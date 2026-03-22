@@ -1,8 +1,8 @@
 {
   "common": {
-    "appName": "Aude Academy",
+    "appName": "Backend Academy",
     "tagline": "Eleve seu domínio profissional",
-    "partOf": "Parte da Aude Cosmetics",
+    "partOf": "Parte da Backend Academy",
     "privacyPolicy": "Política de Privacidade",
     "termsOfService": "Termos de Serviço",
     "support": "Suporte"
@@ -41,51 +41,5 @@
       "changePasswordFailed": "Falha ao alterar a senha",
       "notAuthenticated": "Não autenticado"
     }
-  },
-  "nav": {
-    "courseCatalog": "Catálogo de Cursos",
-    "myCourses": "Meus Cursos",
-    "certification": "Certificação",
-    "settings": "Configurações",
-    "search": "Buscar cursos, especialistas, materiais...",
-    "logout": "Sair"
-  },
-  "dashboard": {
-    "welcomeBack": "Bem-vindo de volta,",
-    "subtitle": "Eleve sua arte de formulação com as masterclasses em destaque.",
-    "breadcrumbHome": "Início",
-    "breadcrumbCourses": "Cursos"
-  },
-  "courses": {
-    "featured": "Cursos em Destaque",
-    "viewAll": "Ver Todos",
-    "allCourses": "Todos os Cursos",
-    "filter": "Filtrar",
-    "sortBy": "Ordenar por:",
-    "newest": "Mais Recentes",
-    "oldest": "Mais Antigos",
-    "title": "Título",
-    "lessons": "Aulas",
-    "enroll": "Inscrever-se",
-    "enrolled": "Continuar Aprendendo",
-    "completed": "Concluído",
-    "difficulty": {
-      "BEGINNER": "Iniciante",
-      "INTERMEDIATE": "Intermediário",
-      "ADVANCED": "Avançado"
-    }
-  },
-  "coursePlayer": {
-    "yourProgress": "Seu Progresso",
-    "currentlyWatching": "Assistindo Agora",
-    "aboutLesson": "Sobre esta Aula",
-    "instructor": "Instrutor",
-    "downloads": "Downloads",
-    "resources": "Recursos incluídos",
-    "certificateTrack": "Certificação",
-    "downloadCertificate": "Baixar Certificado",
-    "completeToUnlock": "COMPLETE TODOS OS MÓDULOS PARA DESBLOQUEAR",
-    "finalAssessment": "Avaliação Final",
-    "mins": "min"
   }
 }

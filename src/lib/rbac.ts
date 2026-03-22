@@ -9,7 +9,7 @@ export async function requireRole(allowedRoles: UserRole[]): Promise<void> {
   const user = await getAuthUser();
 
   if (!allowedRoles.includes(user.role as UserRole)) {
-    redirect('/dashboard');
+    redirect('/');
   }
 }
 
