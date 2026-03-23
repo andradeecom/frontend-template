@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono, JetBrains_Mono } from 'next/font/google';
 import { cn } from '@/lib/utils';
-import './globals.css';
 import { i18n } from '@/lib/i18n';
+import '../globals.css';
 
 const jetbrainsMono = JetBrains_Mono({
   variable: '--font-mono',

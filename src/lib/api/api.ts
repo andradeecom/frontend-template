@@ -23,47 +23,6 @@ async function handleResponse<T>(response: Response): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-/**
- * Store the access token in an HttpOnly cookie.
- */
-export async function setAccessTokenCookie(accessToken: string): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.set('access_token', accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 60 * 15, // 15 minutes (short-lived, matches typical JWT expiry)
-  });
-}
-
-/**
- * Call /auth/refresh with the refresh_token cookie to get a new access token.
- * Returns the new access token or null if refresh failed.
- */
-async function refreshAccessToken(refreshToken: string): Promise<string | null> {
-  try {
-    const base = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
-    const response = await fetch(`${base}/auth/refresh`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Cookie: `refresh_token=${refreshToken}`,
-      },
-      credentials: 'include',
-      cache: 'no-store',
-    });
-
-    if (!response.ok) return null;
-
-    const data = (await response.json()) as { accessToken: string };
-    await setAccessTokenCookie(data.accessToken);
-    return data.accessToken;
-  } catch {
-    return null;
-  }
-}
-
 export async function Api<T>(method: ApiMethod, url: string, options: ApiOptions = {}): Promise<T> {
   const { params, data, cache, revalidate, tags } = options;
 
@@ -86,9 +45,9 @@ export async function Api<T>(method: ApiMethod, url: string, options: ApiOptions
   if (accessToken) {
     headers['Authorization'] = `Bearer ${accessToken}`;
   }
-  if (refreshToken) {
-    headers['Cookie'] = `refresh_token=${refreshToken}`;
-  }
+  // if (refreshToken) {
+  //   headers['Cookie'] = `refresh_token=${refreshToken}`;
+  // }
 
   const fetchOptions: RequestInit = {
     method: method.toUpperCase(),
@@ -186,6 +145,47 @@ export const api = {
     },
   },
 };
+
+/**
+ * Store the access token in an HttpOnly cookie.
+ */
+export async function setAccessTokenCookie(accessToken: string): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set('access_token', accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 15, // 15 minutes (short-lived, matches typical JWT expiry)
+  });
+}
+
+/**
+ * Call /auth/refresh with the refresh_token cookie to get a new access token.
+ * Returns the new access token or null if refresh failed.
+ */
+async function refreshAccessToken(refreshToken: string): Promise<string | null> {
+  try {
+    const base = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
+    const response = await fetch(`${base}/auth/refresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `refresh_token=${refreshToken}`,
+      },
+      credentials: 'include',
+      cache: 'no-store',
+    });
+
+    if (!response.ok) return null;
+
+    const data = (await response.json()) as { accessToken: string };
+    await setAccessTokenCookie(data.accessToken);
+    return data.accessToken;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Read user data from the user_data cookie (set at login).

@@ -27,7 +27,7 @@ export async function proxy(request: NextRequest) {
   const hasRefreshToken = request.cookies.has('refresh_token');
 
   if (subPath === '/') {
-    const destination = hasRefreshToken ? `/${locale}` : `/${locale}/login`;
+    const destination = hasRefreshToken ? `/${locale}/home` : `/${locale}/login`;
     return NextResponse.redirect(new URL(destination, request.url));
   }
 
@@ -40,7 +40,7 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isPublicPath && hasRefreshToken && !subPath.startsWith('/change-password')) {
-    return NextResponse.redirect(new URL(`/${locale}`, request.url));
+    return NextResponse.redirect(new URL(`/${locale}/home`, request.url));
   }
 
   return NextResponse.next();

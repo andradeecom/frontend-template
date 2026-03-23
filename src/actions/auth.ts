@@ -5,37 +5,6 @@ import { cookies, headers } from 'next/headers';
 import { api, setUserCookie, deleteUserCookie, setAccessTokenCookie } from '@/lib/api/api';
 import { loginSchema, forgotPasswordSchema, changePasswordSchema } from '@/lib/validations/auth';
 
-/**
- * Parse raw Set-Cookie headers and forward them to the browser.
- */
-async function forwardCookies(setCookieHeaders: string[]): Promise<void> {
-  const cookieStore = await cookies();
-
-  for (const header of setCookieHeaders) {
-    const [nameValue, ...parts] = header.split(';');
-    const eqIndex = nameValue.indexOf('=');
-    if (eqIndex === -1) continue;
-
-    const name = nameValue.slice(0, eqIndex).trim();
-    const value = nameValue.slice(eqIndex + 1).trim();
-
-    const options: Record<string, unknown> = {};
-    for (const part of parts) {
-      const trimmed = part.trim();
-      const lower = trimmed.toLowerCase();
-      if (lower === 'httponly') options.httpOnly = true;
-      else if (lower === 'secure') options.secure = true;
-      else if (lower.startsWith('path=')) options.path = trimmed.split('=')[1];
-      else if (lower.startsWith('max-age=')) options.maxAge = parseInt(trimmed.split('=')[1], 10);
-      else if (lower.startsWith('samesite='))
-        options.sameSite = trimmed.split('=')[1].toLowerCase() as 'lax' | 'strict' | 'none';
-      else if (lower.startsWith('domain=')) options.domain = trimmed.split('=')[1];
-    }
-
-    cookieStore.set(name, value, options);
-  }
-}
-
 export interface FormState {
   errors?: {
     email?: string[];
@@ -76,7 +45,7 @@ export async function login(prevState: FormState | null, formData: FormData): Pr
     };
   }
 
-  // Forward Set-Cookie headers from backend to browser (refresh_token)
+  // Forward Set-Cookie headers from backend to browser (refresh_token). This server action runs on the server
   await forwardCookies(result.setCookieHeaders);
 
   // Store access token and user data in cookies
@@ -172,5 +141,36 @@ export async function forgotPassword(prevState: FormState | null, formData: Form
       success: true,
       message: 'If an account exists with this email, a password reset link will be sent.',
     };
+  }
+}
+
+/**
+ * Parse raw Set-Cookie headers and forward them to the browser.
+ */
+async function forwardCookies(setCookieHeaders: string[]): Promise<void> {
+  const cookieStore = await cookies();
+
+  for (const header of setCookieHeaders) {
+    const [nameValue, ...parts] = header.split(';');
+    const eqIndex = nameValue.indexOf('=');
+    if (eqIndex === -1) continue;
+
+    const name = nameValue.slice(0, eqIndex).trim();
+    const value = nameValue.slice(eqIndex + 1).trim();
+
+    const options: Record<string, unknown> = {};
+    for (const part of parts) {
+      const trimmed = part.trim();
+      const lower = trimmed.toLowerCase();
+      if (lower === 'httponly') options.httpOnly = true;
+      else if (lower === 'secure') options.secure = true;
+      else if (lower.startsWith('path=')) options.path = trimmed.split('=')[1];
+      else if (lower.startsWith('max-age=')) options.maxAge = parseInt(trimmed.split('=')[1], 10);
+      else if (lower.startsWith('samesite='))
+        options.sameSite = trimmed.split('=')[1].toLowerCase() as 'lax' | 'strict' | 'none';
+      else if (lower.startsWith('domain=')) options.domain = trimmed.split('=')[1];
+    }
+
+    cookieStore.set(name, value, options);
   }
 }
