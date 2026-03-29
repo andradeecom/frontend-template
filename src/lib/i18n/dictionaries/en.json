@@ -16,7 +16,10 @@
       "passwordPlaceholder": "Enter your password",
       "forgotPassword": "Forgot Password?",
       "rememberMe": "Remember for 7 days",
-      "submit": "Login to Dashboard"
+      "submit": "Login to Dashboard",
+      "or": "or",
+      "continueWithGoogle": "Continue with Google",
+      "continueWithApple": "Continue with Apple"
     },
     "forgotPassword": {
       "title": "Recover Password",

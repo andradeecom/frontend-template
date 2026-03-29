@@ -6,6 +6,7 @@ export interface User {
   firstName: string;
   lastName: string;
   role: UserRole;
+  profileImageUrl?: string | null;
   mustChangePassword: boolean;
 }
 
@@ -17,6 +18,14 @@ export interface LoginResponse {
 export interface LoginPayload {
   email: string;
   password: string;
+}
+
+export interface GoogleLoginPayload {
+  code: string;
+  state?: string;
+  scope?: string;
+  authuser?: string;
+  prompt?: string;
 }
 
 export interface ChangePasswordPayload {

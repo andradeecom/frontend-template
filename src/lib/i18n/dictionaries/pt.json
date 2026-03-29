@@ -16,7 +16,10 @@
       "passwordPlaceholder": "Digite sua senha",
       "forgotPassword": "Esqueceu a Senha?",
       "rememberMe": "Lembrar por 7 dias",
-      "submit": "Entrar no Painel"
+      "submit": "Entrar no Painel",
+      "or": "ou",
+      "continueWithGoogle": "Continuar com Google",
+      "continueWithApple": "Continuar com Apple"
     },
     "forgotPassword": {
       "title": "Recuperar Senha",

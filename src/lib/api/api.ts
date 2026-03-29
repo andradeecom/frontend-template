@@ -45,9 +45,6 @@ export async function Api<T>(method: ApiMethod, url: string, options: ApiOptions
   if (accessToken) {
     headers['Authorization'] = `Bearer ${accessToken}`;
   }
-  // if (refreshToken) {
-  //   headers['Cookie'] = `refresh_token=${refreshToken}`;
-  // }
 
   const fetchOptions: RequestInit = {
     method: method.toUpperCase(),
@@ -147,12 +144,12 @@ export const api = {
 };
 
 /**
- * Store the access token in an HttpOnly cookie.
+ * Store the access token cookie in a server/client readable format.
  */
 export async function setAccessTokenCookie(accessToken: string): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.set('access_token', accessToken, {
-    httpOnly: true,
+    httpOnly: false,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
@@ -195,9 +192,13 @@ export async function getUserFromCookie(): Promise<import('@/lib/types/auth').Us
   const raw = cookieStore.get('user_data')?.value;
   if (!raw) return null;
   try {
-    return JSON.parse(raw) as import('@/lib/types/auth').User;
+    return JSON.parse(decodeURIComponent(raw)) as import('@/lib/types/auth').User;
   } catch {
-    return null;
+    try {
+      return JSON.parse(raw) as import('@/lib/types/auth').User;
+    } catch {
+      return null;
+    }
   }
 }
 
@@ -206,8 +207,8 @@ export async function getUserFromCookie(): Promise<import('@/lib/types/auth').Us
  */
 export async function setUserCookie(user: import('@/lib/types/auth').User): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.set('user_data', JSON.stringify(user), {
-    httpOnly: true,
+  cookieStore.set('user_data', encodeURIComponent(JSON.stringify(user)), {
+    httpOnly: false,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',

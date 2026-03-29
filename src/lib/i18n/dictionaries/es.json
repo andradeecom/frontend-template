@@ -16,7 +16,10 @@
       "passwordPlaceholder": "Ingresa tu contraseña",
       "forgotPassword": "¿Olvidaste tu Contraseña?",
       "rememberMe": "Recordar por 7 días",
-      "submit": "Iniciar Sesión en el Panel"
+      "submit": "Iniciar Sesión en el Panel",
+      "or": "o",
+      "continueWithGoogle": "Continuar con Google",
+      "continueWithApple": "Continuar con Apple"
     },
     "forgotPassword": {
       "title": "Recuperar Contraseña",
