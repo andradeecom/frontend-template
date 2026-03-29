@@ -122,7 +122,9 @@ export function LoginForm({ t, lang }: LoginFormProps) {
 
       <div className="flex items-center gap-3">
         <div className="h-px flex-1 bg-border" />
-        <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{t.auth.login.or}</span>
+        <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+          {t.auth.login.or}
+        </span>
         <div className="h-px flex-1 bg-border" />
       </div>
 
@@ -134,7 +136,7 @@ export function LoginForm({ t, lang }: LoginFormProps) {
           disabled={pending}
           className="h-11 w-full cursor-pointer rounded-lg"
         >
-          <GoogleIcon className="mr-2 h-4 w-4" />
+          <GoogleIcon className="mr-2 size-4" />
           {t.auth.login.continueWithGoogle}
         </Button>
 
@@ -145,7 +147,7 @@ export function LoginForm({ t, lang }: LoginFormProps) {
           disabled={pending}
           className="h-11 w-full cursor-pointer rounded-lg"
         >
-          <AppleIcon className="mr-2 h-4 w-4" />
+          <AppleIcon className="mr-2 size-8" />
           {t.auth.login.continueWithApple}
         </Button>
       </div>
@@ -164,10 +166,7 @@ function GoogleIcon({ className }: { className?: string }) {
         d="M12.054 22c2.617.077 5.168-.852 7.041-2.566l-3.318-2.554c-.983.669-2.152 1.009-3.34.973-2.514-.041-4.727-1.663-5.486-4.061H3.518v2.635C5.29 19.955 8.532 22.127 12.054 22z"
         fill="#34A853"
       />
-      <path
-        d="M6.951 13.792a6.12 6.12 0 010-3.584V7.573H3.518a10.186 10.186 0 000 9.854l3.433-2.635z"
-        fill="#FBBC04"
-      />
+      <path d="M6.951 13.792a6.12 6.12 0 010-3.584V7.573H3.518a10.186 10.186 0 000 9.854l3.433-2.635z" fill="#FBBC04" />
       <path
         d="M12.054 6.012c1.416-.023 2.782.508 3.831 1.49l2.864-2.864C16.905 2.968 14.505 2 12.054 2 8.532 1.873 5.29 4.045 3.518 7.573l3.433 2.635c.759-2.398 2.972-4.02 5.486-4.061z"
         fill="#EA4335"
