@@ -1,27 +1,13 @@
 import 'server-only';
 
 import { cache } from 'react';
-import { cookies } from 'next/headers';
-import { ApiError, ApiMethod } from '@/lib/api/types';
+import { cookies, headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { ApiError, ApiMethod, ApiOptions } from '@/lib/api/types';
+import { ACCESS_TOKEN_MAX_AGE, REFRESH_TOKEN_MAX_AGE } from '@/lib/auth-config';
+import { handleResponse } from '@/lib/api/utils';
 
 const API_BASE = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-
-interface ApiOptions {
-  params?: Record<string, string | number | boolean>;
-  data?: unknown;
-  cache?: RequestCache;
-  revalidate?: number | false;
-  tags?: string[];
-}
-
-async function handleResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    const message = (body as { message?: string }).message || response.statusText;
-    throw new ApiError(message, response.status);
-  }
-  return response.json() as Promise<T>;
-}
 
 export async function Api<T>(method: ApiMethod, url: string, options: ApiOptions = {}): Promise<T> {
   const { params, data, cache, revalidate, tags } = options;
@@ -41,14 +27,14 @@ export async function Api<T>(method: ApiMethod, url: string, options: ApiOptions
   const refreshToken = cookieStore.get('refresh_token')?.value;
   const accessToken = cookieStore.get('access_token')?.value;
 
-  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  const reqHeaders: HeadersInit = { 'Content-Type': 'application/json' };
   if (accessToken) {
-    headers['Authorization'] = `Bearer ${accessToken}`;
+    reqHeaders['Authorization'] = `Bearer ${accessToken}`;
   }
 
   const fetchOptions: RequestInit = {
     method: method.toUpperCase(),
-    headers,
+    headers: reqHeaders,
     credentials: 'include',
   };
 
@@ -81,6 +67,13 @@ export async function Api<T>(method: ApiMethod, url: string, options: ApiOptions
     if (newAccessToken) {
       (fetchOptions.headers as Record<string, string>)['Authorization'] = `Bearer ${newAccessToken}`;
       response = await fetch(fullUrl.toString(), fetchOptions);
+    } else {
+      // Refresh token expired/invalid — force logout via Route Handler
+      // (cookies can't be modified during RSC renders, only in Server Actions / Route Handlers)
+      const headerStore = await headers();
+      const referer = headerStore.get('referer') || '';
+      const locale = referer.match(/\/([a-z]{2})\//)?.[1] || 'en';
+      redirect(`/api/auth/force-logout?locale=${locale}`);
     }
   }
 
@@ -149,11 +142,10 @@ export const api = {
 export async function setAccessTokenCookie(accessToken: string): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.set('access_token', accessToken, {
-    httpOnly: false,
-    secure: process.env.NODE_ENV === 'production',
+    secure: true,
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 15, // 15 minutes (short-lived, matches typical JWT expiry)
+    maxAge: ACCESS_TOKEN_MAX_AGE,
   });
 }
 
@@ -177,7 +169,8 @@ async function refreshAccessToken(refreshToken: string): Promise<string | null> 
     if (!response.ok) return null;
 
     const data = (await response.json()) as { accessToken: string };
-    await setAccessTokenCookie(data.accessToken);
+    // Don't persist to cookie here — this may run during RSC renders where
+    // cookie writes are forbidden. The middleware handles proactive refresh.
     return data.accessToken;
   } catch {
     return null;
@@ -208,11 +201,10 @@ export async function getUserFromCookie(): Promise<import('@/lib/types/auth').Us
 export async function setUserCookie(user: import('@/lib/types/auth').User): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.set('user_data', encodeURIComponent(JSON.stringify(user)), {
-    httpOnly: false,
-    secure: process.env.NODE_ENV === 'production',
+    secure: true,
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: REFRESH_TOKEN_MAX_AGE,
   });
 }
 
