@@ -15,7 +15,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx}\""
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx}\"",
+    "prepare": "husky"
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.8.2",
@@ -24,6 +25,8 @@
     "@react-oauth/google": "^0.13.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "negotiator": "^1.0.0",
     "next": "16.2.1",
     "radix-ui": "^1.4.3",

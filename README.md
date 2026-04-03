@@ -16,7 +16,7 @@ This is a frontend template with Next.js and TypeScript.
 - [x] i18n-js
 - [x] Zod (Validation)
 - [x] Proprietary backend API handling
+- [x] React Hook Form (Form handling)
 - [ ] Toast
 - [ ] Zustand (State Management)
-- [ ] React Hook Form (Form handling)
 - [ ] Supabase (Auth and Database) handling

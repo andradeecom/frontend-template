@@ -84,7 +84,7 @@ export async function proxy(request: NextRequest) {
     if (newAccessToken) {
       const response = NextResponse.next();
       response.cookies.set('access_token', newAccessToken, {
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/',
         maxAge: ACCESS_TOKEN_MAX_AGE,
@@ -92,9 +92,10 @@ export async function proxy(request: NextRequest) {
       return response;
     }
 
-    // Refresh failed — token is truly expired, force logout
+    // Refresh failed — token is truly expired, force logout via POST
     const logoutUrl = new URL(`/api/auth/force-logout?locale=${locale}`, request.url);
-    return NextResponse.redirect(logoutUrl);
+    await fetch(logoutUrl.toString(), { method: 'POST', headers: { Cookie: request.headers.get('cookie') || '' } });
+    return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
   }
 
   return NextResponse.next();

@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import { ApiError, ApiMethod, ApiOptions } from '@/lib/api/types';
 import { ACCESS_TOKEN_MAX_AGE, REFRESH_TOKEN_MAX_AGE } from '@/lib/auth-config';
 import { handleResponse } from '@/lib/api/utils';
+import { Locale, supportedLocales } from '@/lib/i18n';
 
 const API_BASE = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
@@ -72,8 +73,12 @@ export async function Api<T>(method: ApiMethod, url: string, options: ApiOptions
       // (cookies can't be modified during RSC renders, only in Server Actions / Route Handlers)
       const headerStore = await headers();
       const referer = headerStore.get('referer') || '';
-      const locale = referer.match(/\/([a-z]{2})\//)?.[1] || 'en';
-      redirect(`/api/auth/force-logout?locale=${locale}`);
+      let locale = referer.match(/\/([a-z]{2})\//)?.[1];
+      if (!locale || !supportedLocales.includes(locale as Locale)) locale = 'en';
+      const host = headerStore.get('host') || 'localhost';
+      const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+      await fetch(`${protocol}://${host}/api/auth/force-logout?locale=${locale}`, { method: 'POST' });
+      redirect(`/${locale}/login`);
     }
   }
 
@@ -142,7 +147,7 @@ export const api = {
 export async function setAccessTokenCookie(accessToken: string): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.set('access_token', accessToken, {
-    secure: true,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
     maxAge: ACCESS_TOKEN_MAX_AGE,
@@ -201,7 +206,7 @@ export async function getUserFromCookie(): Promise<import('@/lib/types/auth').Us
 export async function setUserCookie(user: import('@/lib/types/auth').User): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.set('user_data', encodeURIComponent(JSON.stringify(user)), {
-    secure: true,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
     maxAge: REFRESH_TOKEN_MAX_AGE,
