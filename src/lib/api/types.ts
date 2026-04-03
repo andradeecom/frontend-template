@@ -7,3 +7,11 @@ export class ApiError extends Error {
 }
 
 export type ApiMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+
+export interface ApiOptions {
+  params?: Record<string, string | number | boolean>;
+  data?: unknown;
+  cache?: RequestCache;
+  revalidate?: number | false;
+  tags?: string[];
+}
