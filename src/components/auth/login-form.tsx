@@ -58,7 +58,7 @@ export function LoginForm({ t, lang }: LoginFormProps) {
   }
 
   function onGoogleLogin(): void {
-    window.location.assign(getGoogleAuthUrl());
+    window.location.assign(getGoogleAuthUrl(lang));
   }
 
   function onAppleLogin(): void {

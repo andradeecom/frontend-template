@@ -1,48 +1,63 @@
 'use client';
 
-import { useEffect, useTransition } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { exchangeGoogleCode } from '@/lib/api/client-api';
 import { setAccessTokenClient, setUserClient } from '@/lib/auth-store';
 
-export default function GoogleCallbackPage() {
-  const [isPending, startTransition] = useTransition();
+function GoogleCallbackInner() {
   const params = useParams<{ lang: string }>();
   const router = useRouter();
   const searchParams = useSearchParams();
   const lang = params.lang || 'en';
+  const exchanged = useRef(false);
 
   useEffect(() => {
-    const accessToken = searchParams.get('accessToken');
-    const userRaw = searchParams.get('user');
+    const code = searchParams.get('code');
 
-    if (!accessToken || !userRaw) {
-      const langFromPath = window.location.pathname.split('/')[1] || 'en';
-      router.replace(`/${langFromPath}/login`);
+    if (!code) {
+      router.replace(`/${lang}/login`);
       return;
     }
 
-    startTransition(() => {
-      try {
-        const user = JSON.parse(userRaw) as import('@/lib/types/auth').LoginResponse['user'];
-        setAccessTokenClient(accessToken);
-        setUserClient(user);
+    if (exchanged.current) return;
+    exchanged.current = true;
 
-        if (user.mustChangePassword) {
+    exchangeGoogleCode(code)
+      .then((result) => {
+        setAccessTokenClient(result.accessToken);
+        setUserClient(result.user);
+
+        if (result.user.mustChangePassword) {
           router.replace(`/${lang}/change-password`);
           return;
         }
 
         router.replace(`/${lang}/home`);
-      } catch {
+      })
+      .catch(() => {
         router.replace(`/${lang}/login`);
-      }
-    });
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams.toString()]);
+  }, []);
 
   return (
     <div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">
-      {isPending ? 'Completing Google sign-in...' : 'Redirecting...'}
+      Completing Google sign-in...
     </div>
+  );
+}
+
+export default function GoogleCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">
+          Redirecting...
+        </div>
+      }
+    >
+      <GoogleCallbackInner />
+    </Suspense>
   );
 }
