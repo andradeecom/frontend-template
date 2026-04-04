@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { i18n, getLocale, hasLocale } from '@/lib/i18n';
 import { ACCESS_TOKEN_MAX_AGE } from '@/lib/auth-config';
 
-const publicPaths = ['/login', '/forgot-password', '/change-password'];
+const publicPaths = ['/login', '/forgot-password', '/change-password', '/auth/google/callback'];
 
 const API_BASE = (process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api').replace(
   /\/$/,
