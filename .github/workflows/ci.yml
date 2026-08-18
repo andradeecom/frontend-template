@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  # Also run on main itself, so the branch that PRs are measured against is
+  # known-green rather than assumed.
+  push:
+    branches: [main]
+
+# A new push to a PR makes the in-flight run obsolete; cancel it rather than
+# paying for a result nobody will read. Never cancel on main.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify:
+    name: Lint, test, build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm eslint . --max-warnings 0
+
+      - name: Test
+        run: pnpm test
+
+      # `next build` typechecks the whole app, which is the only typecheck this
+      # project runs — there is no separate tsc step.
+      - name: Build
+        run: pnpm build

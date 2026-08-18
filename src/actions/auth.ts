@@ -1,7 +1,6 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
 import { api, apiBase } from '@/lib/api/api';
 import { clearSessionCookie, forwardSessionCookies } from '@/lib/api/session';
 import { forgotPasswordSchema, changePasswordSchema, loginSchema } from '@/lib/validations/auth';
@@ -39,7 +38,6 @@ export async function login(prevState: FormState | null, formData: FormData): Pr
   }
 
   const { email, password } = validatedFields.data;
-  const lang = (formData.get('lang') as string) || 'en';
 
   let user: LoginResponse['user'];
 
@@ -64,15 +62,16 @@ export async function login(prevState: FormState | null, formData: FormData): Pr
     return { errors: { _form: ['Unable to reach the server. Please try again.'] } };
   }
 
-  redirect(user.mustChangePassword ? `/${lang}/change-password` : `/${lang}/home`);
+  /*
+   * Locale-less on purpose: the middleware rewrites `/home` to the negotiated
+   * locale without a redirect, so the visitor keeps the clean URL. Redirecting
+   * to `/${lang}/home` would pin the prefix into the address bar and bypass
+   * that entirely.
+   */
+  redirect(user.mustChangePassword ? '/change-password' : '/home');
 }
 
 export async function logout(): Promise<void> {
-  // Detect lang from referer before clearing cookies
-  const headerStore = await headers();
-  const referer = headerStore.get('referer') || '';
-  const lang = referer.match(/\/([a-z]{2})\//)?.[1] || 'en';
-
   try {
     // Deletes the session row, so the id is dead server-side immediately —
     // not merely forgotten by this browser.
@@ -83,7 +82,7 @@ export async function logout(): Promise<void> {
 
   await clearSessionCookie();
 
-  redirect(`/${lang}/login`);
+  redirect('/login');
 }
 
 export async function changePassword(prevState: FormState | null, formData: FormData): Promise<FormState> {
@@ -101,7 +100,6 @@ export async function changePassword(prevState: FormState | null, formData: Form
   }
 
   const { newPassword, confirmPassword, currentPassword } = validatedFields.data;
-  const lang = (formData.get('lang') as string) || 'en';
 
   try {
     await api.auth.changePassword({
@@ -117,7 +115,7 @@ export async function changePassword(prevState: FormState | null, formData: Form
     };
   }
 
-  redirect(`/${lang}/`);
+  redirect('/');
 }
 
 export async function forgotPassword(prevState: FormState | null, formData: FormData): Promise<FormState> {

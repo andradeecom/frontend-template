@@ -106,7 +106,7 @@ export async function Api<T>(method: ApiMethod, url: string, options: ApiOptions
     const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
     await fetch(`${protocol}://${host}/api/auth/force-logout?locale=${locale}`, { method: 'POST' });
 
-    redirect(`/${locale}/login`);
+    redirect('/login');
   }
 
   return handleResponse<T>(response);

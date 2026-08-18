@@ -3,27 +3,37 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
+import type { DictionaryTypes } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n/i18n-config';
 import type { User } from '@/lib/types/auth';
 
 interface ProfileCardProps {
   user: User | null;
   onLogout: (formData: FormData) => Promise<void>;
+  lang: Locale;
+  t: DictionaryTypes;
 }
 
-export function ProfileCard({ user, onLogout }: ProfileCardProps) {
+export function ProfileCard({ user, onLogout, lang, t }: ProfileCardProps) {
+  const languageSwitcher = <LanguageSwitcher current={lang} labels={t.common.language} className="w-40" />;
+
   if (!user) {
     return (
       <Card className="max-w-xl">
         <CardHeader>
-          <CardTitle>User profile</CardTitle>
+          <CardTitle>{t.profile.title}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <p className="text-muted-foreground">No user found.</p>
-          <form action={onLogout}>
-            <Button type="submit" variant="destructive">
-              Logout
-            </Button>
-          </form>
+          <p className="text-muted-foreground">{t.profile.notFound}</p>
+          <div className="flex items-center justify-between gap-4">
+            <form action={onLogout}>
+              <Button type="submit" variant="destructive">
+                {t.profile.logout}
+              </Button>
+            </form>
+            {languageSwitcher}
+          </div>
         </CardContent>
       </Card>
     );
@@ -38,37 +48,41 @@ export function ProfileCard({ user, onLogout }: ProfileCardProps) {
     <Card className="max-w-xl">
       <CardHeader>
         <Avatar size="lg">
-          {user.profileImageUrl ? <AvatarImage src={user.profileImageUrl} alt="User profile" /> : null}
+          {user.profileImageUrl ? <AvatarImage src={user.profileImageUrl} alt={t.profile.title} /> : null}
           <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
-        <CardTitle>User profile</CardTitle>
+        <CardTitle>{t.profile.title}</CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-2">
         <p>
-          <strong>ID:</strong> {user.id}
+          <strong>{t.profile.id}:</strong> {user.id}
         </p>
         <p>
-          <strong>First name:</strong> {user.firstName}
+          <strong>{t.profile.firstName}:</strong> {user.firstName}
         </p>
         <p>
-          <strong>Last name:</strong> {user.lastName}
+          <strong>{t.profile.lastName}:</strong> {user.lastName}
         </p>
         <p>
-          <strong>Email:</strong> {user.email}
+          <strong>{t.profile.email}:</strong> {user.email}
         </p>
         <p>
-          <strong>Role:</strong> {user.role}
+          <strong>{t.profile.role}:</strong> {user.role}
         </p>
         <p>
-          <strong>Must change password:</strong> {user.mustChangePassword ? 'Yes' : 'No'}
+          <strong>{t.profile.mustChangePassword}:</strong> {user.mustChangePassword ? t.profile.yes : t.profile.no}
         </p>
 
-        <form action={onLogout} className="pt-3">
-          <Button type="submit" variant="destructive">
-            Logout
-          </Button>
-        </form>
+        <div className="flex items-center justify-between gap-4 pt-3">
+          <form action={onLogout}>
+            <Button type="submit" variant="destructive">
+              {t.profile.logout}
+            </Button>
+          </form>
+
+          {languageSwitcher}
+        </div>
       </CardContent>
     </Card>
   );

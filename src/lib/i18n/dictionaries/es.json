@@ -5,7 +5,16 @@
     "partOf": "Parte de Backend Academy",
     "privacyPolicy": "Política de Privacidad",
     "termsOfService": "Términos de Servicio",
-    "support": "Soporte"
+    "support": "Soporte",
+    "language": {
+      "label": "Idioma",
+      "names": {
+        "en": "English",
+        "es": "Español",
+        "pt": "Português"
+      },
+      "apply": "Aplicar"
+    }
   },
   "auth": {
     "login": {
@@ -44,5 +53,18 @@
       "changePasswordFailed": "Error al cambiar la contraseña",
       "notAuthenticated": "No autenticado"
     }
+  },
+  "profile": {
+    "title": "Perfil de usuario",
+    "id": "ID",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "email": "Correo electrónico",
+    "role": "Rol",
+    "mustChangePassword": "Debe cambiar la contraseña",
+    "yes": "Sí",
+    "no": "No",
+    "logout": "Cerrar sesión",
+    "notFound": "No se encontró ningún usuario."
   }
 }

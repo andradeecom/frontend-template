@@ -32,6 +32,8 @@ whether a session cookie is present.
 | `pnpm dev`                  | Dev server (Turbopack)          |
 | `pnpm build` / `pnpm start` | Production build, then serve it |
 | `pnpm lint`                 | ESLint                          |
+| `pnpm test`                 | Vitest (run once)               |
+| `pnpm test:watch`           | Vitest (watch mode)             |
 | `pnpm format`               | Prettier                        |
 
 ## Environment
@@ -99,6 +101,25 @@ src/
 - [ ] Toast
 - [ ] Zustand (state management)
 
+## Testing
+
+```bash
+pnpm test         # once
+pnpm test:watch   # watch mode
+```
+
+Vitest, with specs in a `__specs__/` folder beside the code they cover. They run
+in a Node environment against the server-side logic — cookie forwarding, locale
+detection, and the middleware's routing decisions — rather than rendering
+components.
+
+The auth specs pin security properties rather than behaviour in general: that
+`forwardSessionCookies` preserves `HttpOnly`/`Secure`/`SameSite` instead of
+reconstructing them, that the CSRF cookie stays readable while the session does
+not, and that the middleware only ever checks whether the session cookie is
+*present* — it never tries to interpret it, because the cookie is opaque and
+only the backend can judge it.
+
 ## Releasing
 
 The **Bump Version** GitHub Action (`workflow_dispatch`) bumps `package.json`,
@@ -144,8 +165,12 @@ is needed and call out anything that alters behaviour for existing clients.
 
 ```bash
 pnpm lint
+pnpm test
 pnpm build
 ```
+
+Every PR runs these in CI (`.github/workflows/ci.yml`), and `main` will not
+accept a merge until that check passes.
 
 ## License
 
