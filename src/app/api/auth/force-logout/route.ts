@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { clearSessionCookie } from '@/lib/api/session';
 import { Locale, supportedLocales } from '@/lib/i18n';
 
+/**
+ * Drops a session cookie the backend has already rejected.
+ *
+ * This exists because cookies cannot be mutated during an RSC render, so the
+ * server API layer delegates the deletion here when it sees a 401.
+ */
 export async function POST(request: NextRequest) {
-  const cookieStore = await cookies();
-  cookieStore.delete('refresh_token');
-  cookieStore.delete('access_token');
-  cookieStore.delete('user_data');
+  await clearSessionCookie();
 
   let locale = request.nextUrl.searchParams.get('locale') as Locale;
   if (!locale || !supportedLocales.includes(locale)) locale = 'en';
