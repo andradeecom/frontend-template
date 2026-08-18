@@ -10,8 +10,11 @@ export interface User {
   mustChangePassword: boolean;
 }
 
+/**
+ * Login returns the profile only. The credential is an httpOnly session cookie
+ * set by the backend, so there is deliberately no token field here.
+ */
 export interface LoginResponse {
-  accessToken: string;
   user: User;
 }
 

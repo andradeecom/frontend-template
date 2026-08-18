@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useRef } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { exchangeGoogleCode } from '@/lib/api/client-api';
-import { setAccessTokenClient, setUserClient } from '@/lib/auth-store';
 
 function GoogleCallbackInner() {
   const params = useParams<{ lang: string }>();
@@ -23,11 +22,10 @@ function GoogleCallbackInner() {
     if (exchanged.current) return;
     exchanged.current = true;
 
+    // The exchange runs on this app's server, which relays the backend's
+    // httpOnly session cookie. Nothing credential-shaped comes back here.
     exchangeGoogleCode(code)
       .then((result) => {
-        setAccessTokenClient(result.accessToken);
-        setUserClient(result.user);
-
         if (result.user.mustChangePassword) {
           router.replace(`/${lang}/change-password`);
           return;
