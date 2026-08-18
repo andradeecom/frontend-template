@@ -1,18 +1,14 @@
 'use client';
 
-import { useTransition } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useActionState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { ArrowRightIcon, EnvelopeIcon, LockIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DictionaryTypes } from '@/lib/i18n';
-import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
-import { getGoogleAuthUrl, loginClient } from '@/lib/api/client-api';
-import { setAccessTokenClient, setUserClient } from '@/lib/auth-store';
+import { getGoogleAuthUrl } from '@/lib/api/client-api';
+import { login, type FormState } from '@/actions/auth';
 
 interface LoginFormProps {
   t: DictionaryTypes;
@@ -20,53 +16,25 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ t, lang }: LoginFormProps) {
-  const {
-    register,
-    handleSubmit,
-    setError,
-    formState: { errors, isSubmitting },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-  });
-
-  const [isOAuthPending] = useTransition();
-  const router = useRouter();
-
-  const pending = isSubmitting || isOAuthPending;
-
-  function persistLoginAndRedirect(result: import('@/lib/types/auth').LoginResponse): void {
-    setAccessTokenClient(result.accessToken);
-    setUserClient(result.user);
-
-    if (result.user.mustChangePassword) {
-      router.replace(`/${lang}/change-password`);
-      return;
-    }
-
-    router.replace(`/${lang}/`);
-  }
-
-  async function onSubmit(data: LoginFormData): Promise<void> {
-    try {
-      const result = await loginClient(data.email, data.password);
-      persistLoginAndRedirect(result);
-    } catch (error) {
-      setError('root', {
-        message: error instanceof Error ? error.message : t.auth.errors.loginFailed,
-      });
-    }
-  }
+  /*
+   * Login runs as a Server Action rather than a client fetch. The credential is
+   * an httpOnly cookie set server-side, so it is never visible to this
+   * component — there is nothing here to store, and nothing for injected
+   * script to read.
+   */
+  const [state, formAction, pending] = useActionState<FormState | null, FormData>(login, null);
 
   function onGoogleLogin(): void {
     window.location.assign(getGoogleAuthUrl(lang));
   }
 
   function onAppleLogin(): void {
-    setError('root', { message: 'Apple Sign-In coming soon.' });
+    window.alert('Apple Sign-In coming soon.');
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <form action={formAction} className="space-y-5">
+      <input type="hidden" name="lang" value={lang} />
       <div className="space-y-2">
         <Label htmlFor="email" className="text-sm font-semibold text-foreground">
           {t.auth.login.emailLabel}
@@ -75,13 +43,14 @@ export function LoginForm({ t, lang }: LoginFormProps) {
           <EnvelopeIcon className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             id="email"
+            name="email"
             type="email"
+            autoComplete="email"
             placeholder={t.auth.login.emailPlaceholder}
             className="h-11 rounded-lg border-border bg-input pl-10 text-sm placeholder:text-muted-foreground/60"
-            {...register('email')}
           />
         </div>
-        {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
+        {state?.errors?.email && <p className="text-sm text-destructive">{state.errors.email[0]}</p>}
       </div>
 
       <div className="space-y-2">
@@ -100,16 +69,17 @@ export function LoginForm({ t, lang }: LoginFormProps) {
           <LockIcon className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             id="password"
+            name="password"
             type="password"
+            autoComplete="current-password"
             placeholder={t.auth.login.passwordPlaceholder}
             className="h-11 rounded-lg border-border bg-input pl-10 text-sm placeholder:text-muted-foreground/60"
-            {...register('password')}
           />
         </div>
-        {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
+        {state?.errors?.password && <p className="text-sm text-destructive">{state.errors.password[0]}</p>}
       </div>
 
-      {errors.root && <p className="text-sm text-destructive">{errors.root.message}</p>}
+      {state?.errors?._form && <p className="text-sm text-destructive">{state.errors._form[0]}</p>}
 
       <Button
         type="submit"
