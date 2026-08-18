@@ -9,13 +9,23 @@ export function getLocale(request: NextRequest): string | undefined {
 
   const locales: string[] = i18n.locales as unknown as string[];
 
-  const languages = new Negotiator({ headers: negotiatorHeaders }).languages();
+  /*
+   * Negotiator returns `['*']` — not an empty array — when the request carries
+   * no usable Accept-Language, which is common enough (curl, health checks,
+   * many bots). `matchLocale` throws a RangeError on the wildcard, so it has to
+   * be filtered out before matching rather than only checking for emptiness.
+   */
+  const languages = new Negotiator({ headers: negotiatorHeaders }).languages().filter((language) => language !== '*');
 
-  if (!languages || languages.length === 0) {
+  if (languages.length === 0) {
     return i18n.defaultLocale;
   }
 
-  const locale = matchLocale(languages, locales, i18n.defaultLocale);
-
-  return locale;
+  try {
+    return matchLocale(languages, locales, i18n.defaultLocale);
+  } catch {
+    // A malformed tag (`Accept-Language: !!!`) reaches here. A visitor sending
+    // one should get the default locale, not a 500 from the middleware.
+    return i18n.defaultLocale;
+  }
 }
