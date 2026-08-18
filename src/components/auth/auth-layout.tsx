@@ -4,10 +4,13 @@ import Link from 'next/link';
 import { DictionaryTypes } from '@/lib/i18n';
 import { GraduationCapIcon } from '@phosphor-icons/react';
 import { Card, CardContent } from '@/components/ui/card';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
+import type { Locale } from '@/lib/i18n/i18n-config';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
   t: DictionaryTypes;
+  lang: Locale;
 }
 
 const LogoIcon = (
@@ -16,7 +19,7 @@ const LogoIcon = (
   </div>
 );
 
-export function AuthLayout({ children, t }: AuthLayoutProps) {
+export function AuthLayout({ children, t, lang }: AuthLayoutProps) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-muted px-4 py-12">
       <div className="w-full max-w-110">
@@ -41,6 +44,10 @@ export function AuthLayout({ children, t }: AuthLayoutProps) {
           <Link href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
             {t.common.support}
           </Link>
+        </div>
+
+        <div className="mt-4 flex justify-center">
+          <LanguageSwitcher current={lang} labels={t.common.language} className="w-40" />
         </div>
       </div>
     </div>

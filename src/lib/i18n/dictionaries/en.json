@@ -5,7 +5,16 @@
     "partOf": "Part of Backend Academy",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
-    "support": "Support"
+    "support": "Support",
+    "language": {
+      "label": "Language",
+      "names": {
+        "en": "English",
+        "es": "Español",
+        "pt": "Português"
+      },
+      "apply": "Apply"
+    }
   },
   "auth": {
     "login": {
@@ -44,5 +53,18 @@
       "changePasswordFailed": "Failed to change password",
       "notAuthenticated": "Not authenticated"
     }
+  },
+  "profile": {
+    "title": "User profile",
+    "id": "ID",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "role": "Role",
+    "mustChangePassword": "Must change password",
+    "yes": "Yes",
+    "no": "No",
+    "logout": "Logout",
+    "notFound": "No user found."
   }
 }
